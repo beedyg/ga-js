@@ -2,12 +2,13 @@ jQuery(document).ready(function($) {
 
 	//Initial parameters (which could be based on input)
 	var target = 'To be or not to be.';
-	var genSize = 100;
+	var genSize = 20;
 	var genLimit = 10000;
-	var mutRate = 0.05;
+	var mutRate = 0.25;
 
 	//Set the target text so we know what we're looking for
 	$('#target').text(target);
+	for(i=0;i<genSize;i++) $('#population').append('<span id="pop' + i + '"></span><br>');
 
 	//Create a target arrary of floats to represent our target
 	var target_arr = target.split('');
@@ -19,11 +20,6 @@ jQuery(document).ready(function($) {
 	for(var i=0;i<genSize;i++){
 		population[i] = Array();
 		for(var j=0;j<target_size;j++) population[i][j] = Math.random();
-	}
-
-	//Create our holding bits
-	for(var i=0;i<genSize;i++){
-		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
 	}
 
 	//Score each of population
@@ -38,7 +34,7 @@ jQuery(document).ready(function($) {
 	var best_score = 0;
 
 	//set the loop running
-	var intervalId = setInterval(myLoop, 50);
+	var intervalId = setInterval(myLoop, 1);
 
 	/**
 	 * Replaces a normal looop which took the form:
@@ -64,19 +60,38 @@ jQuery(document).ready(function($) {
 			popScore[d1] = nFit;
 		}
 
-		//Could replace with a pick best here
-		var y = pickAGoodParent(popScore);
-
-		//Ouput values and to see if we've arrived at target
+		//Return the FIRST best member of the populaion and save their score
+		var y = 0;
+		var best_score = 0;
+		for(var i=0;i<popScore.length;i++){
+			if(popScore[i] > best_score){
+				best_score = popScore[i];
+				y = i;
+			}
+		}
 		output = floatsToString(population[y]);
-		best_score = calculateFitness(target_arr,population[y]);
+
+		//Find a good populatiom member to show churn
+		var churn_i = pickAGoodParent(popScore);
+		var churn_text = floatsToString(population[churn_i]);
+
+		//Ouput current values to the page
+		$('#generation').text(c);
+
 		$('#output').text(output);
-		$('#score').text(best_score);
+		$('#best-score').text(best_score);
+
+		$('#churner').text(churn_text);
+		$('#churn-score').text(popScore[churn_i]);
+
+		//Ouput the entire generation to the 'popX' spans we created earlier
+		for(i=0;i<genSize;i++){
+			$('#pop' + i).text(floatsToString(population[i]) + ' ' + popScore[i]);
+		}
 
 		//Stopping condition
 		if(c++ > genLimit || output == target){
 			clearInterval(intervalId);
-			window.alert("Finished! at count " + c);
 		}
 
 	}
@@ -124,7 +139,7 @@ jQuery(document).ready(function($) {
 	}
 
 	/**
-	 * From an array of scores return the index of one, using the sqaure of their scores +1  as
+	 * From an array of scores return the index of one, using the sqaure of their scores +1 as
 	 * realitve probability weights
 	 */
 	function pickAGoodParent(theList)

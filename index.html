@@ -14,12 +14,21 @@
 
 	<div class="container">
 		<h1>Very simple Genetic Algorithm search</h1>
-		<p>Target = &ldquo;<span id="target"></span>&rdquo;</p>
-		<p>Output = &ldquo;<span id="output"></span>&rdquo;</p>
+		<h2>Satistics</h2>
 		<div class="row">
-			<div class="span6" id="pop"></div>
-			<div class="span6" id="score"></div>
+			<div class="span6">
+				<p><strong>Target:</strong> &ldquo;<span id="target"></span>&rdquo;</p>
+				<p><strong>Output:</strong> &ldquo;<span id="output"></span>&rdquo;</p>
+				<p><strong>Churns:</strong> &ldquo;<span id="churner"></span>&rdquo;</p>
+			</div>
+			<div class="span6">
+				<p><strong>Generation:</strong> <span id="generation">0</span></p>
+				<p><strong>Best score:</strong> <span id="best-score">0</span></p>
+				<p><strong>This score:</strong> <span id="churn-score">0</span></p>
+			</div>
 		</div>
+		<h2>Population</h2>
+		<p id="population"></p>
 		
 	</div>
 
