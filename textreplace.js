@@ -19,19 +19,63 @@ jQuery(document).ready(function($) {
 		population[i] = Array();
 		for(var j=0;j<target_size;j++) population[i][j] = Math.random();
 	}
+
+	//Create our holding bits
+	for(var i=0;i<genSize;i++){
+		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
+	}
+
+	var output = '';
+	var c = 0;
+	var limit = 10000000;
+	var best_score = 0;
+	while(c++ < limit && output != target ){
+
+		//Score each of population
+		var popScore = Array();
+		for(var i=0;i<genSize;i++){
+			popScore[i] = calculateFitness(target_arr,population[i]);
+		}
+
+		//Choose 2 parents
+		var p1 = population[pickAGoodParent(popScore)];
+		var p2 = population[pickAGoodParent(popScore)];
+
+		//Create offspring and replace a member of the population
+		population[pickOneToDie(popScore)] = combineParents(p1,p2,0.1);
+
+		//should replace with a pick best here
+		var y = pickAGoodParent(popScore);
+		output = floatsToString(population[y]);
+		best_score = calculateFitness(target_arr,population[y]);
+		/*
+		$('#output').text(output);
+
+		//Output this genetation and it's scores
+		for(var i=0;i<genSize;i++){
+			//out = floatsToString(population[i]);
+			$('#pop' + i).text(floatsToString(population[i]) + ' - ' + popScore[i]);
+		}
+		*/
+		//$('#output').text(output + ' ' + best_score);
+
+	}
+	$('#output').text(output + ' ' + best_score);
 	
+	/*
 	//Score each of population
 	var popScore = Array();
 	for(var i=0;i<genSize;i++){
 		popScore[i] = calculateFitness(target_arr,population[i]);
 	}
 
+
+
 	//Output this genetation and it's scores
 
 	for(var i=0;i<genSize;i++){
 		//out = floatsToString(population[i]);
 		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
-		$('#pop' + i).text(floatsToString(population[i]));
 	}
 
 	for(var i=0;i<genSize;i++){
@@ -40,7 +84,8 @@ jQuery(document).ready(function($) {
 	}
 
 	//var p_id = pickAGoodParent(popScore);
-	window.alert('Chosen = ' + floatsToString(population[pickAGoodParent(popScore)]));
+	window.alert('Chosen = ' + floatsToString(population[pickAGoodParent(popScore)]) +
+							'\r\nDie = ' + floatsToString(population[pickOneToDie(popScore)]));
 
 /*
 	var output_arr = Array();
@@ -122,17 +167,16 @@ function characterToFloat(character)
 		var lSize = theList.length;
 		var tSquares = 0;
 		for(var i=0;i<lSize;i++){
-			tSquares += Math.pow(theList[i],2);
+			tSquares += Math.pow(theList[i]+1,3);
 		}
-		if(tSquares > 0){
+		if(tSquares != lSize){
 			var pDist = Array();
 			var i,sum = 0;
 			for(i=0;i<lSize-1;i++){
-				if(theList[i] > 0){
-					sum += (Math.pow(theList[i],2) / tSquares);
-				}
+				sum += (Math.pow(theList[i]+1,3) / tSquares);
 				pDist[i] = sum;
 			}
+			
 			var r = Math.random();
 			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
 			rValue = i;	
@@ -150,11 +194,75 @@ function characterToFloat(character)
 	{
 		var rValue = 0;
 		var lSize = theList.length;
+		var tSquares = 0;
+		for(var i=0;i<lSize;i++){
+			tSquares += Math.pow(theList[i]+1,3);
+		}
+		if(tSquares != lSize){
+			var pDist = Array();
+			var i,sum = 0;
+			for(i=0;i<lSize-1;i++){
+				sum += (1 - (Math.pow(theList[i]+1,3) / tSquares));
+				pDist[i] = sum;
+			}
+			var r = Math.random();
+			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
+			rValue = i;	
+		} else {
+			//return random element if everyone scored 0
+			rValue = Math.floor(Math.random() * lSize);
+		}
+		return rValue;
+	}
+
+	/**
+	 * Take 2 arrays and combine them, adding a chance of a mutation
+	 **/
+	function combineParents(parent1, parent2, mutRate)
+	{
+		var offspring = Array();
+		for(var i=0;i<parent1.length;i++){
+			if(Math.floor(Math.random() * 2) == 0){
+				offspring[i] = parent1[i];
+			} else offspring[i] = parent2[i];
+		}
+		//random mutation
+		if(Math.random() > mutRate){
+			var x = Math.floor(Math.random() * parent1.length);
+			offspring[x] = Math.random();
+		}
+		return offspring;
+	}
+	/*
+	{
+		var rValue = 0;
+		var lSize = theList.length;
 		//Find the lowest score
 		var vLow = Math.min.apply(null, theList);
 		//Find the highest score
 		var vHigh = Math.max.apply(null, theList);
-
+		
+		if(vLow != vHigh){
+			var tSquares = 0;
+			for(var i=0;i<lSize;i++){
+				tSquares += Math.pow(theList[i]+1,2);
+			}
+			var pDist = Array();
+			for(i=0;i<lSize-1;i++){
+				if(theList[i] > 0){
+					sum += 1 - (Math.pow(theList[i]+1,2) / tSquares);
+				}
+				pDist[i] = sum;
+			}
+			var r = Math.random();
+			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
+			rValue = i;	
+		} else {
+			//return random element if everyone scored the same
+			rValue = Math.floor(Math.random() * lSize);
+		}
+		return rValue;
+	}
 
 
 		/*
@@ -177,6 +285,4 @@ function characterToFloat(character)
 			//return random element if everyone scored 0
 			rValue = Math.floor(Math.random() * lSize);
 		}
-		return rValue;
 		*/
-	}
