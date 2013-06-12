@@ -5,6 +5,7 @@ jQuery(document).ready(function($) {
 	var genLimit = 10000;
 	var mutRate = 0.05;
 
+
 	//Set the target text so we know what we're looking for
 	$('#target').text(target);
 
@@ -25,7 +26,8 @@ jQuery(document).ready(function($) {
 		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
 	}
 
-	var output = '';
+	var output = population[0];
+	$('#output').text(output);
 	var c = 0;
 	var best_score = 0;
 
@@ -35,8 +37,11 @@ jQuery(document).ready(function($) {
 		popScore[i] = calculateFitness(target_arr,population[i]);
 	}
 
-	while(c++ < genLimit && output != target ){
+	var intervalId = setInterval(myLoop, 1);
 
+	//while(c++ < genLimit && output != target ){
+	function myLoop(){
+		
 		//Choose 2 parents
 		var p1 = population[pickAGoodParent(popScore)];
 		var p2 = population[pickAGoodParent(popScore)];
@@ -57,6 +62,13 @@ jQuery(document).ready(function($) {
 		var y = pickAGoodParent(popScore);
 		output = floatsToString(population[y]);
 		best_score = calculateFitness(target_arr,population[y]);
+		$('#output').text(output + ' ' + best_score);
+
+		//Stopping condition
+		if(c++ > genLimit || output == target){
+			clearInterval(intervalId);
+			window.alert("Finished! at count " + c);
+		}
 		//document.writeln(output + " " + best_score + '\r\n');
 		//document.getElementById("output").innerHTML = output + ' ' + best_score;
 		/*
@@ -71,7 +83,7 @@ jQuery(document).ready(function($) {
 		//$('#output').text(output + ' ' + best_score);
 
 	}
-	$('#output').text(output + ' ' + best_score);
+	//$('#output').text(output + ' ' + best_score);
 	
 	/*
 	//Score each of population

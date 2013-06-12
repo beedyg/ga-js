@@ -6,10 +6,14 @@ jQuery(document).ready(function($) {
 	var weights = [0,2,3,7,9,12,1,0,3,7];
 	for(i=0;i<10000;i++){ counts[pickOneToDie(weights)]++; }
 
-	for(i=0;i<counts.length;i++){
-		//out = floatsToString(population[i]);
-		$('#pop').append('<p>' + weights[i] + ' ' + counts[i] + '</p>');
+	function tFunc(){
+		for(i=0;i<counts.length;i++){
+			//out = floatsToString(population[i]);
+			$('#pop').append('<p>' + weights[i] + ' ' + counts[i] + '</p>');
+		}
 	}
+
+	setInterval(tFunc,10);
 
 
 });
