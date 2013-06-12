@@ -1,8 +1,8 @@
 jQuery(document).ready(function($) {
 
 	var target = 'To be or not to be.';
-	var genSize = 1000;
-	var genLimit = 100000;
+	var genSize = 100;
+	var genLimit = 10000;
 	var mutRate = 0.05;
 
 	//Set the target text so we know what we're looking for
@@ -57,7 +57,7 @@ jQuery(document).ready(function($) {
 		var y = pickAGoodParent(popScore);
 		output = floatsToString(population[y]);
 		best_score = calculateFitness(target_arr,population[y]);
-		document.writeln(output + " " + best_score + '\r\n');
+		//document.writeln(output + " " + best_score + '\r\n');
 		//document.getElementById("output").innerHTML = output + ' ' + best_score;
 		/*
 		$('#output').text(output);
