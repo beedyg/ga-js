@@ -1,9 +1,9 @@
 jQuery(document).ready(function($) {
 
 	var target = 'To be or not to be.';
-	var genSize = 10;
-	var genLimit = 1000;
-	var mutRate = 0.0;
+	var genSize = 1000;
+	var genLimit = 100000;
+	var mutRate = 0.05;
 
 	//Set the target text so we know what we're looking for
 	$('#target').text(target);
@@ -27,27 +27,38 @@ jQuery(document).ready(function($) {
 
 	var output = '';
 	var c = 0;
-	var limit = 10000000;
 	var best_score = 0;
-	while(c++ < limit && output != target ){
 
-		//Score each of population
-		var popScore = Array();
-		for(var i=0;i<genSize;i++){
-			popScore[i] = calculateFitness(target_arr,population[i]);
-		}
+	//Score each of population
+	var popScore = Array();
+	for(var i=0;i<genSize;i++){
+		popScore[i] = calculateFitness(target_arr,population[i]);
+	}
+
+	while(c++ < genLimit && output != target ){
 
 		//Choose 2 parents
 		var p1 = population[pickAGoodParent(popScore)];
 		var p2 = population[pickAGoodParent(popScore)];
 
 		//Create offspring and replace a member of the population
-		population[pickOneToDie(popScore)] = combineParents(p1,p2,0.1);
+		var new1 = combineParents(p1,p2,mutRate);
+		var d1 = pickOneToDie(popScore);
+		var nFit = calculateFitness(target_arr,new1);
+
+		if(nFit >= popScore[d1]){
+			population[d1] = new1;
+			popScore[d1] = nFit;
+		}
+
+		//population[pickOneToDie(popScore)] = combineParents(p1,p2,mutRate);
 
 		//should replace with a pick best here
 		var y = pickAGoodParent(popScore);
 		output = floatsToString(population[y]);
 		best_score = calculateFitness(target_arr,population[y]);
+		document.writeln(output + " " + best_score + '\r\n');
+		//document.getElementById("output").innerHTML = output + ' ' + best_score;
 		/*
 		$('#output').text(output);
 
@@ -167,13 +178,13 @@ function characterToFloat(character)
 		var lSize = theList.length;
 		var tSquares = 0;
 		for(var i=0;i<lSize;i++){
-			tSquares += Math.pow(theList[i]+1,3);
+			tSquares += Math.pow(theList[i]+1,2);
 		}
 		if(tSquares != lSize){
 			var pDist = Array();
 			var i,sum = 0;
 			for(i=0;i<lSize-1;i++){
-				sum += (Math.pow(theList[i]+1,3) / tSquares);
+				sum += (Math.pow(theList[i]+1,2) / tSquares);
 				pDist[i] = sum;
 			}
 			
@@ -192,17 +203,18 @@ function characterToFloat(character)
 	 */
 	function pickOneToDie(theList)
 	{
+		/*
 		var rValue = 0;
 		var lSize = theList.length;
 		var tSquares = 0;
 		for(var i=0;i<lSize;i++){
-			tSquares += Math.pow(theList[i]+1,3);
+			tSquares += Math.pow(theList[i]+1,2);
 		}
 		if(tSquares != lSize){
 			var pDist = Array();
 			var i,sum = 0;
 			for(i=0;i<lSize-1;i++){
-				sum += (1 - (Math.pow(theList[i]+1,3) / tSquares));
+				sum += (1 - (Math.pow(theList[i]+1,2) / tSquares));
 				pDist[i] = sum;
 			}
 			var r = Math.random();
@@ -213,6 +225,8 @@ function characterToFloat(character)
 			rValue = Math.floor(Math.random() * lSize);
 		}
 		return rValue;
+		*/
+		return  Math.floor(Math.random() * theList.length);
 	}
 
 	/**
