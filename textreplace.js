@@ -1,10 +1,10 @@
 jQuery(document).ready(function($) {
 
+	//Initial parameters (which could be based on input)
 	var target = 'To be or not to be.';
 	var genSize = 100;
 	var genLimit = 10000;
 	var mutRate = 0.05;
-
 
 	//Set the target text so we know what we're looking for
 	$('#target').text(target);
@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
 	//Create a target arrary of floats to represent our target
 	var target_arr = target.split('');
 	var target_size = target_arr.length;
-	for(var i=0;i<target_arr.length;i++) target_arr[i] = characterToFloat(target_arr[i]);
+	for(var i=0;i<target_size;i++) target_arr[i] = characterToFloat(target_arr[i]);
 
 	//create our initial population
 	var population = Array();	
@@ -26,21 +26,28 @@ jQuery(document).ready(function($) {
 		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
 	}
 
-	var output = population[0];
-	$('#output').text(output);
-	var c = 0;
-	var best_score = 0;
-
 	//Score each of population
 	var popScore = Array();
 	for(var i=0;i<genSize;i++){
 		popScore[i] = calculateFitness(target_arr,population[i]);
 	}
 
-	var intervalId = setInterval(myLoop, 1);
+	//Initial parameters for the loop
+	var output = population[0];
+	var c = 0;
+	var best_score = 0;
 
-	//while(c++ < genLimit && output != target ){
-	function myLoop(){
+	//set the loop running
+	var intervalId = setInterval(myLoop, 50);
+
+	/**
+	 * Replaces a normal looop which took the form:
+	 * while(c++ < genLimit && output != target ){}
+	 * beacuse this can update the screen for each generation 
+	 * and stops the browser getting worried the script is taking too long
+	 **/
+	function myLoop()
+	{
 		
 		//Choose 2 parents
 		var p1 = population[pickAGoodParent(popScore)];
@@ -50,104 +57,51 @@ jQuery(document).ready(function($) {
 		var new1 = combineParents(p1,p2,mutRate);
 		var d1 = pickOneToDie(popScore);
 		var nFit = calculateFitness(target_arr,new1);
-
+		//See if we should replace the current member
 		if(nFit >= popScore[d1]){
+			//If so just update the population and score (no need to recalculate for entire population)
 			population[d1] = new1;
 			popScore[d1] = nFit;
 		}
 
-		//population[pickOneToDie(popScore)] = combineParents(p1,p2,mutRate);
-
-		//should replace with a pick best here
+		//Could replace with a pick best here
 		var y = pickAGoodParent(popScore);
+
+		//Ouput values and to see if we've arrived at target
 		output = floatsToString(population[y]);
 		best_score = calculateFitness(target_arr,population[y]);
-		$('#output').text(output + ' ' + best_score);
+		$('#output').text(output);
+		$('#score').text(best_score);
 
 		//Stopping condition
 		if(c++ > genLimit || output == target){
 			clearInterval(intervalId);
 			window.alert("Finished! at count " + c);
 		}
-		//document.writeln(output + " " + best_score + '\r\n');
-		//document.getElementById("output").innerHTML = output + ' ' + best_score;
-		/*
-		$('#output').text(output);
-
-		//Output this genetation and it's scores
-		for(var i=0;i<genSize;i++){
-			//out = floatsToString(population[i]);
-			$('#pop' + i).text(floatsToString(population[i]) + ' - ' + popScore[i]);
-		}
-		*/
-		//$('#output').text(output + ' ' + best_score);
 
 	}
-	//$('#output').text(output + ' ' + best_score);
-	
-	/*
-	//Score each of population
-	var popScore = Array();
-	for(var i=0;i<genSize;i++){
-		popScore[i] = calculateFitness(target_arr,population[i]);
+
+	/**
+	 * Converts a float between 0 and 1 to a valid ASCII character
+	 * I.e. a character represented by a CharCode between 32 and 126
+	 */
+	function floatToCharacter(number)
+	{
+		return String.fromCharCode(Math.floor((number * 95) + 32)); 
 	}
 
-
-
-	//Output this genetation and it's scores
-
-	for(var i=0;i<genSize;i++){
-		//out = floatsToString(population[i]);
-		$('#pop').append('<p id="pop' + i + '">&nbsp;</p>');
+	/**
+	 * Converts a float between 0 and 1 to a valid ASCII character
+	 * I.e. a character represented by a CharCode between 32 and 126
+	 */
+	function characterToFloat(character)
+	{
+		return (character.charCodeAt(0) - 32) / 95;
 	}
 
-	for(var i=0;i<genSize;i++){
-		//out = floatsToString(population[i]);
-		$('#score').append('<p>' + popScore[i] + '</p>');
-	}
-
-	//var p_id = pickAGoodParent(popScore);
-	window.alert('Chosen = ' + floatsToString(population[pickAGoodParent(popScore)]) +
-							'\r\nDie = ' + floatsToString(population[pickOneToDie(popScore)]));
-
-/*
-	var output_arr = Array();
-	for(i=0;i<target_arr.length;i++) output_arr[i] = Math.random();
-var codes = '';
-	var output = '';
-	for(i=0;i<output_arr.length;i++) output += floatToCharacter(output_arr[i]);	
-			for(var j=0;j<population.length;j++){
-			codes += '.' + Math.floor((population[i][j] * 95) + 32);
-		}
-		$('#pop').append('<p>' + codes + '</p>');
-
-	*/
-	
-	//$('#output').text(output);
-
-});
-
-/**
- * Converts a float between 0 and 1 to a valid ASCII character
- * I.e. a character represented by a CharCode between 32 and 126
- */
-function floatToCharacter(number)
-{
-	return String.fromCharCode(Math.floor((number * 95) + 32)); 
-}
-
-/**
- * Converts a float between 0 and 1 to a valid ASCII character
- * I.e. a character represented by a CharCode between 32 and 126
- */
-function characterToFloat(character)
-{
-	return (character.charCodeAt(0) - 32) / 95;
-}
-
-/**
- * Fitness function which returns a score based on how close one array is to another
- **/
+ /**
+  * Fitness function which returns a score based on how close one array is to another
+  */
  function calculateFitness(target, attempt)
  {
  	var score = 0;
@@ -156,21 +110,10 @@ function characterToFloat(character)
  	}
  	return score;
  }
- /*
- //Old version using average distance
- function calculateFitness(target, attempt)
- {
- 	var distance = 0.0;
- 	for(var i=0;i<target.length;i++){
- 		distance += Math.pow((target[i] - attempt[i]), 2);
- 	}
- 	return distance;
- }
- */
 
- /**
-  * Turn an array of floats into a lovely String
-  */
+	/**
+	 * Turn an array of floats into a lovely String
+	 */
 	function floatsToString(float_arr)
 	{
 		var rString = '';
@@ -181,8 +124,8 @@ function characterToFloat(character)
 	}
 
 	/**
-	 * From an array of scores return the index of one of them using the sqaure of their scores as
-	 * a percentage of likelyhood
+	 * From an array of scores return the index of one, using the sqaure of their scores +1  as
+	 * realitve probability weights
 	 */
 	function pickAGoodParent(theList)
 	{
@@ -215,35 +158,13 @@ function characterToFloat(character)
 	 */
 	function pickOneToDie(theList)
 	{
-		/*
-		var rValue = 0;
-		var lSize = theList.length;
-		var tSquares = 0;
-		for(var i=0;i<lSize;i++){
-			tSquares += Math.pow(theList[i]+1,2);
-		}
-		if(tSquares != lSize){
-			var pDist = Array();
-			var i,sum = 0;
-			for(i=0;i<lSize-1;i++){
-				sum += (1 - (Math.pow(theList[i]+1,2) / tSquares));
-				pDist[i] = sum;
-			}
-			var r = Math.random();
-			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
-			rValue = i;	
-		} else {
-			//return random element if everyone scored 0
-			rValue = Math.floor(Math.random() * lSize);
-		}
-		return rValue;
-		*/
+		//Could do a negative probabity here, but with the check against the new member this works OK
 		return  Math.floor(Math.random() * theList.length);
 	}
 
 	/**
 	 * Take 2 arrays and combine them, adding a chance of a mutation
-	 **/
+	 */
 	function combineParents(parent1, parent2, mutRate)
 	{
 		var offspring = Array();
@@ -259,56 +180,5 @@ function characterToFloat(character)
 		}
 		return offspring;
 	}
-	/*
-	{
-		var rValue = 0;
-		var lSize = theList.length;
-		//Find the lowest score
-		var vLow = Math.min.apply(null, theList);
-		//Find the highest score
-		var vHigh = Math.max.apply(null, theList);
-		
-		if(vLow != vHigh){
-			var tSquares = 0;
-			for(var i=0;i<lSize;i++){
-				tSquares += Math.pow(theList[i]+1,2);
-			}
-			var pDist = Array();
-			for(i=0;i<lSize-1;i++){
-				if(theList[i] > 0){
-					sum += 1 - (Math.pow(theList[i]+1,2) / tSquares);
-				}
-				pDist[i] = sum;
-			}
-			var r = Math.random();
-			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
-			rValue = i;	
-		} else {
-			//return random element if everyone scored the same
-			rValue = Math.floor(Math.random() * lSize);
-		}
-		return rValue;
-	}
 
-
-		/*
-		for(var i=0;i<lSize;i++){
-			tSquares += Math.pow(theList[i],2);
-		}
-		if(tSquares > 0){
-			var pDist = Array();
-			var i,sum = 0;
-			for(i=0;i<lSize-1;i++){
-				if(theList[i] > 0){
-					sum += (Math.pow(theList[i],2) / tSquares);
-				}
-				pDist[i] = sum;
-			}
-			var r = Math.random();
-			for(var i=0; i<lSize && r >= pDist[i]; i++) ;
-			rValue = i;	
-		} else {
-			//return random element if everyone scored 0
-			rValue = Math.floor(Math.random() * lSize);
-		}
-		*/
+}); //end document.ready()
