@@ -50,6 +50,9 @@ jQuery(document).ready(function($) {
 		var p2 = population[pickAGoodParent(popScore)];
 
 		//Create offspring and replace a member of the population
+		//Variable mutation rate!
+		mutRate = (best_score > 0) ? Math.pow(best_score,2) / Math.pow(target_size,2) : 1 / Math.pow(target_size,2);
+
 		var new1 = combineParents(p1,p2,mutRate);
 		var d1 = pickOneToDie(popScore);
 		var nFit = calculateFitness(target_arr,new1);
