@@ -7,9 +7,10 @@ jQuery(document).ready(function($) {
 	var mutRate = 0.25;
 
 	//Set the target text so we know what we're looking for
-	$('#target').text(target);
-	for(i=0;i<genSize;i++) $('#population').append('<span id="pop' + i + '"></span><br>');
-
+  $('#target').text(target);
+  var ul = $('<ul>')
+	for(i=0;i<genSize;i++) ul.append('<li id="pop' + i + '"></li>');
+  $('#population').append(ul)
 	//Create a target arrary of floats to represent our target
 	var target_arr = target.split('');
 	var target_size = target_arr.length;
